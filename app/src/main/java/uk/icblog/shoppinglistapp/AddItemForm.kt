@@ -1,6 +1,6 @@
 package uk.icblog.shoppinglistapp
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +35,7 @@ fun AddItemForm(mainViewModel: MainViewModel){
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
-    fun actionAfterAddSuccess(){
+    fun actionAfterAdd(){
         // return boolean
         val result =   mainViewModel.handleAddBtn(itemName,itemQty)
         if(result){
@@ -44,7 +44,15 @@ fun AddItemForm(mainViewModel: MainViewModel){
             itemName = ""
             itemQty = ""
 
-        }// end if
+        }else{
+            if("name" in mainViewModel.shoppingListState.value.msg ||
+                "already" in mainViewModel.shoppingListState.value.msg
+                ){
+                focusRequester1.requestFocus()
+            }else{
+                focusRequester2.requestFocus()
+            }
+         }// end if
     }// end actionAfterAddSuccess
 
 
@@ -54,7 +62,7 @@ fun AddItemForm(mainViewModel: MainViewModel){
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-
+          // Item name input field
         OutlinedTextField(
             value= itemName,
             onValueChange = {itemName = it.trim()},
@@ -69,18 +77,30 @@ fun AddItemForm(mainViewModel: MainViewModel){
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    actionAfterAddSuccess()
+                    actionAfterAdd()
                 }
             )
         )
-        Row{
-
-            Box{
-                OutlinedTextField(
+        //Show  name error msg if is not empty
+        if(mainViewModel.shoppingListState.value.msg.isNotBlank() &&
+            "name" in mainViewModel.shoppingListState.value.msg ||
+            "already" in mainViewModel.shoppingListState.value.msg
+            ){
+            Text(
+                text = mainViewModel.shoppingListState.value.msg,
+                style = TextStyle(
+                    fontSize = 15.sp,
+                    color = Color.Red)
+            )
+        }
+        Row( verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)){
+            // Item quantity input field
+                   OutlinedTextField(
                     value = itemQty,
                     onValueChange = { itemQty = it.trim() },
                     singleLine = true,
-                    modifier = Modifier.padding(vertical = 8.dp).focusRequester(focusRequester2).onFocusEvent{mainViewModel.removeMsgOnInputFocus()},
+                    modifier = Modifier.weight(1f).padding(vertical = 8.dp).focusRequester(focusRequester2).onFocusEvent{mainViewModel.removeMsgOnInputFocus()},
                     label = { (Text("Quantity")) },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Done, // We use "Done" to trigger action when enter is pressed
@@ -88,34 +108,34 @@ fun AddItemForm(mainViewModel: MainViewModel){
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            actionAfterAddSuccess()
+                            actionAfterAdd()
                         }
                     )
 
                 )
-            }// end box
-            Box(
-                modifier = Modifier.padding(start = 50.dp, top= 25.dp)
-            ){
                 Button(
                     onClick = {
-                        actionAfterAddSuccess()
+                        actionAfterAdd()
                               },
 
                     ) {
                     Text("Add")
                 }// end button
-            }// end box
+
         }// end row
-        //Show msg if is not empty
-        if(mainViewModel.shoppingListState.value.msg.isNotBlank()){
+
+        //Show quantity error msg if is not empty
+        if(mainViewModel.shoppingListState.value.msg.isNotBlank() &&
+            "quantity" in mainViewModel.shoppingListState.value.msg
+        ){
             Text(
                 text = mainViewModel.shoppingListState.value.msg,
                 style = TextStyle(
                     fontSize = 15.sp,
                     color = Color.Red)
-                )
+            )
         }
+
         //Horizontal rule
         HrDivider()
     }// end column

@@ -14,10 +14,6 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
@@ -26,24 +22,27 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun ListDisplay(mainViewModel: MainViewModel){
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+   // var selectedTabIndex by remember { mutableIntStateOf(mainViewModel.shoppingListState.value.selectedTabIndex) }
 
 
     Column(modifier = Modifier.fillMaxSize()) {
         // TabRow for the tabs
         TabRow(
-            selectedTabIndex = selectedTabIndex,
+            selectedTabIndex = mainViewModel.shoppingListState.value.selectedTabIndex,
             modifier = Modifier.fillMaxWidth(),
             indicator = { tabPositions -> // Customize tab indicator if needed
                 TabRowDefaults.SecondaryIndicator(
-                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    Modifier.tabIndicatorOffset(tabPositions[mainViewModel.shoppingListState.value.selectedTabIndex]),
                 )
             }
         ) {
             // Tab items
             Tab(
-                selected = selectedTabIndex == 0,
-                onClick = { selectedTabIndex = 0 },
+                selected = mainViewModel.shoppingListState.value.selectedTabIndex == 0,
+                onClick = {
+                    //selectedTabIndex = 0
+                    mainViewModel.handleTabClick("pending_items")
+                          },
                 text = {
                     val pendingItemsCountColor = if (mainViewModel.shoppingListState.value.pendingItemsCount > 0) Color.Red else Color.Black
                     Row{
@@ -65,8 +64,11 @@ fun ListDisplay(mainViewModel: MainViewModel){
 
             )
             Tab(
-                selected = selectedTabIndex == 1,
-                onClick = { selectedTabIndex = 1 },
+                selected = mainViewModel.shoppingListState.value.selectedTabIndex == 1,
+                onClick = {
+                    //selectedTabIndex = 1
+                    mainViewModel.handleTabClick("trolley_items")
+                          },
 
                 text = {
                     val trolleyItemsCountColor = if (mainViewModel.shoppingListState.value.trolleyItemsCount > 0) Color(0xFF4CAF50) else Color.Black
@@ -91,12 +93,10 @@ fun ListDisplay(mainViewModel: MainViewModel){
         }
 
         // Content based on selected tab
-        when (selectedTabIndex) {
+        when (mainViewModel.shoppingListState.value.selectedTabIndex) {
 
             0 -> {
-//                if(mainViewModel.shoppingListState.value.pendingItemsCount == 0){
-//                    selectedTabIndex = 1
-//                }
+
                 //Pending items
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
@@ -121,9 +121,7 @@ fun ListDisplay(mainViewModel: MainViewModel){
 
             }
             1 -> {
-//                if(mainViewModel.shoppingListState.value.trolleyItemsCount == 0){
-//                    selectedTabIndex = 0
-//                }
+
                 //Trolley items
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
